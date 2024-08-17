@@ -68,26 +68,32 @@ char* argv0;
 void usage(void) {
 	/* clang-format off */
     std::cout <<
-        "Usage: " << argv0 << " <youtube/youtube music playlist url> <target directory>"
+        "Usage: " << argv0 << " <youtube/youtube music playlist url> <target directory> <yt-dlp args>"
         << std::endl;
 	/* clang-format on */
 }
 
 int main(int argc, char** argv) {
 	argv0 = argv[0];
-	if (argc != 3) {
+	if (argc < 3) {
 		std::cerr << "ERROR: wrong number of arguments" << std::endl;
 		usage();
 		return exit_codes::wrong_arguments;
 	}
 	const auto playlist_url = std::string(argv[1]);
 	const auto music_dir = std::string(argv[2]);
+	std::string yt_dlp_args = "";
+	if (argc > 3) {
+		for (int i = 3; i < argc; i++) {
+			yt_dlp_args = yt_dlp_args + " " + argv[i];
+		}
+	}
 	json yt_dlp_output;
 	{
 		std::string yt_dlp_output_json;
 		auto cmd = std::string(YT_DLP_CMD " " YT_DLP_ARGS
 						  " -J --flat-playlist ") +
-			   playlist_url;
+			   playlist_url + yt_dlp_args;
 		auto out = run_command_w_warn(cmd);
 		yt_dlp_output = json::parse(std::get<1>(out));
 	}
@@ -138,7 +144,7 @@ int main(int argc, char** argv) {
 		return exit_codes::success;
 	}
 
-	std::string cmd = YT_DLP_CMD " " YT_DLP_ARGS;
+	auto cmd = std::string(YT_DLP_CMD " " YT_DLP_ARGS) + yt_dlp_args;
 	for (auto missing_el : missing) {
 		std::cout << "[N] "
 			  << static_cast<std::string>(missing_el["id"])
