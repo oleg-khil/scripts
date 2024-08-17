@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
+[ -z "$1" ] && exit 1
+
+TMP_DIR=$(mktemp -d)
+
+cleanup(){
+    rm -rf "$TMP_DIR"
+}
+
+trap cleanup EXIT
+
+cp -- "$1"/mirror-git-repos "$TMP_DIR"
+cd "$TMP_DIR"
+
+mkdir mirrors
+
+printf "https://github.com/swaywm/sway" > mirrors/sway
+printf "https://gitlab.freedesktop.org/wlroots/wlroots.git" > mirrors/wlroots
+
+git clone --mirror https://git.suckless.org/dwm mirrors/dwm
+
+./mirror-git-repos ./mirrors

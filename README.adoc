@@ -1,0 +1,65 @@
+= scripts
+:reproducible:
+
+Small programs (or rather scripts) that I wrote for myself
+
+=== fixname
+
+Renames the files provided via arguments after "fixing"
+(removing shell-unfriendly characters, replacing them with `_`,
+lower case file extensions) their names
+
+WARNING: if a file with "fixed" name already exists, it will be quietly overwritten
+
+=== rename2uniq
+
+Renames the files provided via arguments to
+`<random uuid without dashes>.<original file extension in lower case>`
+
+=== mirror-git-repos
+
+Locally mirrors remote git repositories
+
+Requires git & git-lfs to present in PATH at runtime
+
+The first (and only) argument is the path to the directory where the mirrors
+are located
+
+Every entry (file in directory) is processed in separate thread.
+
+Exit code is total_error_count % 255 (if total_error_count is exactly 255,
+the exit code is 255) (only exit codes 0 to 255 are valid)
+
+If the file is a directory, then `git remote update`, `git gc`, `git lfs fetch --all`
+are run in it (assuming each dir is a bare git repo initialized with `git clone
+--mirror`)
+
+If it’s a regular file, the first line is read (assuming each file contains the
+URL to the remote repo as the first line (only the first line is read)), the
+file is renamed, bare git repo is initialized with `git clone --mirror` and then
+updated with the commands above, if the cloning fails, the file is renamed back,
+otherwise the file is deleted
+
+All output (both stderr and stdout) is outputted on stdout with thread prefix
+(path that thread is precessing)
+
+This tool is intended to be run periodically via systemd timers or cron
+
+=== archive_yt_playlist
+
+Archives tracks from youtube playlist, downloading all missing
+(locally unavailable) items
+
+Requires `yt-dlp` to present in PATH at runtime
+
+The first argument is the url of the youtube playlist,
+the second argument is the path to the archive directory
+(where all the files will be downloaded)
+
+== Compilation
+
+There is Nix shell, you can enter repo dir, type `nix develop` or `nix-shell` and then `make <make target>`
+
+To build fully static binaries - `nix build` or `nix-build`
+
+(`make` just calls cmake, so you can use cmake directly)

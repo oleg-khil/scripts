@@ -1,0 +1,9 @@
+/.direnv/
+.nixd.json
+.ccls-cache/
+/.cache
+events.json
+compile_commands.json
+*.o
+/result*
+/build

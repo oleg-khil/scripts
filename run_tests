@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
+[ -z "$1" ] && exit 1
+
+for test_script in tests/*; do
+    echo
+    echo "--- Test $test_script started"
+    "$test_script" "$1"
+    echo "--- Test $test_script exited"
+    echo
+done

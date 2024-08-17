@@ -1,0 +1,42 @@
+#!/usr/bin/env bash
+
+set -e
+set -o pipefail
+
+[ -z "$1" ] && exit 1
+
+TMP_DIR=$(mktemp -d)
+
+cleanup(){
+    rm -rf -- "$TMP_DIR"
+}
+
+trap cleanup EXIT
+
+cp -- "$1"/* "$TMP_DIR"
+cd "$TMP_DIR"
+
+mkdir -p tests/{correct_dir,"not correct dir"}
+touch tests/{correct_dir,"not correct dir"}/{"not correct file with spaces and \$ special ? chars.MP4",correct_file.mkv}
+
+echo "before fixname"
+echo "==="
+find tests | sort
+echo "==="
+echo
+
+./fixname tests/{correct_dir,"not correct dir"}/*
+
+echo
+echo "after fixname"
+echo "==="
+find tests | sort
+echo "==="
+
+for file in tests/{correct_dir,"not correct dir"}/correct_file.mkv; do
+    test -f "$file" || exit 2
+done
+
+for file in tests/{correct_dir,"not correct dir"}/not_correct_file_with_spaces_and___special___chars.mp4; do
+    test -f "$file" || exit 3
+done
