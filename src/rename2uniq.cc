@@ -7,8 +7,7 @@
 
 #include <uuid.h>
 
-int main(int argc, char **argv)
-{
+int main(int argc, char** argv) {
 	if (argc < 2) {
 		return exit_codes::wrong_arguments;
 	}
@@ -35,7 +34,8 @@ int main(int argc, char **argv)
 		const auto new_file = file.parent_path() / new_filename;
 		try {
 			std::filesystem::rename(file, new_file);
-		} catch (...) {
+		}
+		catch (...) {
 			std::cerr << "Failed to rename \"" << file.string()
 				  << "\" to \"" << new_file.string() << "\""
 				  << std::endl;

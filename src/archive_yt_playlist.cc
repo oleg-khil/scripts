@@ -1,8 +1,8 @@
+#include <filesystem>
 #include <iostream>
 #include <regex>
-#include <string>
-#include <filesystem>
 #include <stdexcept>
+#include <string>
 
 #if __cpp_lib_bind_front
 #include <functional>
@@ -15,8 +15,8 @@ using json = nlohmann::json;
 
 namespace std
 {
-namespace fs = filesystem;
-}
+	namespace fs = filesystem;
+} // namespace std
 
 #ifndef YT_DLP_CMD
 #define YT_DLP_CMD "yt-dlp"
@@ -26,10 +26,9 @@ namespace fs = filesystem;
 #define YT_DLP_ARGS "-f bestaudio --audio-quality 321K -x --audio-format mp3"
 #endif
 
-std::tuple<int, std::string> run_command(std::string cmd)
-{
+std::tuple<int, std::string> run_command(std::string cmd) {
 	std::string output;
-	FILE *cmd_output_pipe;
+	FILE* cmd_output_pipe;
 	if ((cmd_output_pipe = popen(cmd.c_str(), "r")) == nullptr) {
 		throw std::runtime_error("failed to open pipe");
 	}
@@ -44,8 +43,7 @@ std::tuple<int, std::string> run_command(std::string cmd)
 		static_cast<int>(pclose(cmd_output_pipe) % 255), output);
 }
 
-std::tuple<int, std::string> run_command_w_warn(std::string cmd)
-{
+std::tuple<int, std::string> run_command_w_warn(std::string cmd) {
 	auto result = run_command(cmd);
 	auto exit_code = std::get<0>(result);
 	if (exit_code) {
@@ -56,8 +54,7 @@ std::tuple<int, std::string> run_command_w_warn(std::string cmd)
 	return result;
 }
 
-bool file_exists_in_path_by_regex(std::fs::path path, std::regex regex)
-{
+bool file_exists_in_path_by_regex(std::fs::path path, std::regex regex) {
 	for (auto file : std::fs::directory_iterator(path)) {
 		if (std::regex_match(file.path().filename().c_str(), regex)) {
 			return true;
@@ -66,10 +63,9 @@ bool file_exists_in_path_by_regex(std::fs::path path, std::regex regex)
 	return false;
 }
 
-char *argv0;
+char* argv0;
 
-void usage(void)
-{
+void usage(void) {
 	/* clang-format off */
     std::cout <<
         "Usage: " << argv0 << " <youtube/youtube music playlist url> <target directory>"
@@ -77,8 +73,7 @@ void usage(void)
 	/* clang-format on */
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char** argv) {
 	argv0 = argv[0];
 	if (argc != 3) {
 		std::cerr << "ERROR: wrong number of arguments" << std::endl;
@@ -102,7 +97,8 @@ int main(int argc, char **argv)
 			<< "WARN: target directory doesn't exists, creating... ";
 		try {
 			std::fs::create_directory(music_dir);
-		} catch (...) {
+		}
+		catch (...) {
 			std::cerr << "ERROR" << std::endl;
 			;
 			return exit_codes::fail;
@@ -132,7 +128,8 @@ int main(int argc, char **argv)
 		auto id = static_cast<std::string>(playlist_entry["id"]);
 		if (!file_exists(std::regex(std::string(".*") + id + ".*"))) {
 			missing.push_back(playlist_entry);
-		} else {
+		}
+		else {
 			std::cout << "[F] " << id << std::endl;
 		}
 	}
@@ -156,5 +153,6 @@ int main(int argc, char **argv)
 
 	run_command_w_warn(cmd);
 
-	return exit_codes::success; // yt-dlp will exit with exit code 1 if something is deleted or unavailable for other reasons
+	return exit_codes::
+		success; // yt-dlp will exit with exit code 1 if something is deleted or unavailable for other reasons
 }

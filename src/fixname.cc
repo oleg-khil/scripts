@@ -6,8 +6,7 @@
 
 #include "utils.hh"
 
-std::string fix_filename(const std::string &filename)
-{
+std::string fix_filename(const std::string& filename) {
 	auto fixed = std::string(filename);
 	fixed = std::regex_replace(fixed, utils::make_regexp("^-*"), "");
 	fixed = std::regex_replace(
@@ -17,13 +16,11 @@ std::string fix_filename(const std::string &filename)
 	fixed = std::regex_replace(fixed, utils::file_extension_regex, ext);
 	return fixed;
 }
-std::string fix_filename(const char *filename)
-{
+std::string fix_filename(const char* filename) {
 	return fix_filename(std::string(filename));
 }
 
-int main(int argc, char **argv)
-{
+int main(int argc, char** argv) {
 	if (argc < 2) {
 		return exit_codes::wrong_arguments;
 	}
@@ -36,7 +33,8 @@ int main(int argc, char **argv)
 		}
 		try {
 			std::filesystem::rename(file, new_file);
-		} catch (...) {
+		}
+		catch (...) {
 			std::cerr << "Failed to rename \"" << file.string()
 				  << "\" to \"" << new_file.string() << "\""
 				  << std::endl;
