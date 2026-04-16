@@ -53,27 +53,21 @@ std::size_t update_repo(const std::fs::path path) {
 	const auto run_in_repo_dir = std::bind_front(run_in_path, path);
 
 	if (std::fs::is_directory(path)) {
-		if (!run_in_repo_dir("git remote update")) {
-			ERR("update failed");
-			error_count++;
-		}
-		else {
-			OK("update successful");
-		}
-		if (!run_in_repo_dir("git gc")) {
-			ERR("gc failed");
-			error_count++;
-		}
-		else {
-			OK("gc successful");
-		}
-		if (!run_in_repo_dir("git lfs fetch --all")) {
-			ERR("lfs update failed");
-			error_count++;
-		}
-		else {
-			OK("lfs update successful");
-		}
+#define RUN_CMD_IN_REPO(cmd)                      \
+	do {                                          \
+		if (!run_in_repo_dir(cmd)) {              \
+			ERR("command \"" cmd "\" failed");    \
+			error_count++;                        \
+		}                                         \
+		else {                                    \
+			OK("command \"" cmd "\" successful"); \
+		}                                         \
+	} while (0)
+
+        RUN_CMD_IN_REPO("git fetch --atomic --prune");
+        RUN_CMD_IN_REPO("git remote --prune update");
+        RUN_CMD_IN_REPO("git lfs fetch --all --prune");
+        RUN_CMD_IN_REPO("git gc --prune");
 	}
 	else {
 		std::string repo_url;
@@ -122,7 +116,8 @@ int main(int argc, char** argv) {
 	std::atomic_size_t errors = 0;
 	auto iter = std::fs::directory_iterator(mirrors_dir);
 	std::for_each(std::fs::begin(iter), std::fs::end(iter),
-		      [&jobs](auto e) {
+		      [&jobs](auto e)
+		      {
 			      jobs.push_back(std::async(std::launch::async,
 							update_repo, e));
 		      });
