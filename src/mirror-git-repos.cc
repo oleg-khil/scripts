@@ -65,7 +65,7 @@ std::size_t update_repo(const std::fs::path path) {
 	} while (0)
 
         RUN_CMD_IN_REPO("git fetch --atomic --prune");
-        RUN_CMD_IN_REPO("git remote --prune update");
+        RUN_CMD_IN_REPO("git remote update --prune");
         RUN_CMD_IN_REPO("git lfs fetch --all --prune");
         RUN_CMD_IN_REPO("git gc --prune");
 	}
